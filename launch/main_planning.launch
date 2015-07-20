@@ -1,0 +1,8 @@
+<launch>
+
+  <include file="$(find pr2_moveit_config)/launch/demo.launch"/>
+
+  <node name="main_planning" pkg="moveit_walkman" type="main_planning" respawn="false" output="screen">
+  </node>
+
+</launch>
