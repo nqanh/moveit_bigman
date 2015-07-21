@@ -18,10 +18,9 @@ catkin_package(
 )
 find_package(Eigen REQUIRED)
 
-###########
-## Build ##
-###########
-
+#################################
+## Build
+#################################
 
 include_directories(SYSTEM ${Boost_INCLUDE_DIR} ${EIGEN_INCLUDE_DIRS})
 include_directories(${catkin_INCLUDE_DIRS})
@@ -32,3 +31,9 @@ target_link_libraries(main_planning ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 install(TARGETS main_planning DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+#################################
+## for lauch files
+#################################
+
+#add_subdirectory(bigman_moveit_config)  
