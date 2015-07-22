@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <package>
-  <name>moveit_walkman</name>
+  <name>moveit_bigman</name>
   <version>0.6.1</version>
   <description>Planning for walkman</description>
   <license>BSD</license>
 
   <author email="anh.nguyen@iit.it">Anh Nguyen</author>
-<maintainer email="anh.nguyen@iit.it">Anh Nguyen</maintainer>
+  <maintainer email="anh.nguyen@iit.it">Anh Nguyen</maintainer>
 
   <buildtool_depend>catkin</buildtool_depend>
 

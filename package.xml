@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>moveit_walkman</name>
+  <name>moveit_bigman</name>
   <version>0.6.1</version>
   <description>Planning for walkman</description>
   <license>BSD</license>

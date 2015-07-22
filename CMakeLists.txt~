@@ -36,4 +36,4 @@ install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 ## for lauch files
 #################################
 
-add_subdirectory(bigman_moveit_config)  
+#add_subdirectory(bigman_moveit_config)  
