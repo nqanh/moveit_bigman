@@ -58,16 +58,16 @@ main (int argc,
   ROS_INFO("Visualizing plan: x %s", success ? "" : "FAILED");
   sleep (5.0);
 
-  // Visualizing // may need publisher ...
-  if (1)
-  //while(1)
-  {
-    ROS_INFO("Visualizing plan (again) ... ");
-    display_trajectory.trajectory_start = my_plan.start_state_;
-    display_trajectory.trajectory.push_back (my_plan.trajectory_);
-    display_publisher.publish (display_trajectory);
-    sleep (5.0);
-  }
+//  // Visualizing // may need publisher ...
+//  if (1)
+//  //while(1)
+//  {
+//    ROS_INFO("Visualizing plan (again) ... ");
+//    display_trajectory.trajectory_start = my_plan.start_state_;
+//    display_trajectory.trajectory.push_back (my_plan.trajectory_);
+//    display_publisher.publish (display_trajectory);
+//    sleep (5.0);
+//  }
 
   ROS_INFO("Starting new plan .......");
 
@@ -75,8 +75,12 @@ main (int argc,
   // CHECK again WHAT HAPPEN IF THE ROBOT MOVES ITS ARM --> what is the current state???
 
   robot_state::RobotState start_state (*group.getCurrentState ());
+  //geometry_msgs::Pose start_pose2 = target_pose1;
   geometry_msgs::Pose start_pose2 = target_pose1;
-//  start_pose2.orientation.w = 1.0;
+//  start_pose2.orientation.w = 0.0;
+//  start_pose2.orientation.x = 1.0;
+//  start_pose2.orientation.y = 0.0;
+//  start_pose2.orientation.z = 0.0;
 //  start_pose2.position.x = 0.55;
 //  start_pose2.position.y = -0.4;
 //  start_pose2.position.z = 0.15;
@@ -84,20 +88,22 @@ main (int argc,
   start_state.setFromIK (joint_model_group, start_pose2);
   group.setStartState (start_state);
 
-  geometry_msgs::Pose target_pose_ori;
-  target_pose_ori.orientation.x = 0.0;
-  target_pose_ori.orientation.y = 1.0;
-  target_pose_ori.orientation.z = 0.0;
-
-  target_pose_ori.position = target_pose1.position;
   //group.setStartStateToCurrentState();
 
-  group.setPoseTarget (target_pose_ori);
+  geometry_msgs::Pose target_pose2;
+  target_pose2.orientation.x = 0.7071;
+  target_pose2.orientation.y = 0.0;
+  target_pose2.orientation.z = 0.7071;
+  target_pose2.orientation.w = 0.0;
+  target_pose2.position.x = 0.55;
+  target_pose2.position.y = -0.4;
+  target_pose2.position.z = 0.15;
+  group.setPoseTarget (target_pose2);
 
   //call the planner
   success = group.plan (my_plan);
   ROS_INFO("Visualizing plan: orientation %s", success ? "" : "FAILED");
-  sleep (15.0);
+  sleep (5.0);
 
   // Moving to a pose goal
   /* Uncomment below line when working with a real robot*/
@@ -149,7 +155,6 @@ main (int argc,
 //  ROS_INFO("Visualizing plan: z %s", success ? "" : "FAILED");
 //  sleep (10.0);
 //==================================================================
-
 //
 //
 //  // Planning to a joint-space goal
@@ -175,9 +180,9 @@ main (int argc,
 //  // Planning with Path Constraints
 //  // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //  //
-//  // Path constraints can easily be specified for a link on the robot.
-//  // Let's specify a path constraint and a pose goal for our group.
-//  // First define the path constraint.
+  // Path constraints can easily be specified for a link on the robot.
+  // Let's specify a path constraint and a pose goal for our group.
+  // First define the path constraint.
 //  moveit_msgs::OrientationConstraint ocm;
 //  ocm.link_name = "RWrMot3";
 //  ocm.header.frame_id = "base_link";
@@ -191,17 +196,16 @@ main (int argc,
 //  moveit_msgs::Constraints test_constraints;
 //  test_constraints.orientation_constraints.push_back(ocm);
 //  group.setPathConstraints(test_constraints);
-//
-//  // We will reuse the old goal that we had and plan to it.
-//  // Note that this will only work if the current state already
-//  // satisfies the path constraints. So, we need to set the start
-//  // state to a new pose.
+  // We will reuse the old goal that we had and plan to it.
+  // Note that this will only work if the current state already
+  // satisfies the path constraints. So, we need to set the start
+  // state to a new pose.
 //  robot_state::RobotState start_state(*group.getCurrentState());
 //  geometry_msgs::Pose start_pose2;
 //  start_pose2.orientation.w = 1.0;
 //  start_pose2.position.x = 0.55;
-//  start_pose2.position.y = -0.05;
-//  start_pose2.position.z = 0.8;
+//  start_pose2.position.y = -0.4;
+//  start_pose2.position.z = 0.15;
 //  const robot_state::JointModelGroup *joint_model_group =
 //                  start_state.getJointModelGroup(group.getName());
 //  start_state.setFromIK(joint_model_group, start_pose2);
@@ -215,10 +219,8 @@ main (int argc,
 //  ROS_INFO("Visualizing plan 3 (constraints) %s",success?"":"FAILED");
 //  /* Sleep to give Rviz time to visualize the plan. */
 //  sleep(10.0);
-//
-//  // When done with the path constraint be sure to clear it.
-//  group.clearPathConstraints();
-//
+  // When done with the path constraint be sure to clear it.
+  //group.clearPathConstraints();
 //  // Cartesian Paths
 //  // ^^^^^^^^^^^^^^^
 //  // You can plan a cartesian path directly by specifying a list of waypoints
