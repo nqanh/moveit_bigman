@@ -91,9 +91,9 @@ main (int argc,
   //group.setStartStateToCurrentState();
 
   geometry_msgs::Pose target_pose2;
-  target_pose2.orientation.x = 0.7071;
-  target_pose2.orientation.y = 0.0;
-  target_pose2.orientation.z = 0.7071;
+  target_pose2.orientation.x = 0.0;
+  target_pose2.orientation.y = 1.0;
+  target_pose2.orientation.z = 0.0;
   target_pose2.orientation.w = 0.0;
   target_pose2.position.x = 0.55;
   target_pose2.position.y = -0.4;
