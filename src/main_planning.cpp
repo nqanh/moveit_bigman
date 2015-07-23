@@ -9,6 +9,14 @@
 #include <moveit_msgs/AttachedCollisionObject.h>
 #include <moveit_msgs/CollisionObject.h>
 
+#include <Eigen/Geometry>
+
+#define RAD2DEG (180.0/M_PI)
+#define DEG2RAD (M_PI/180.0)
+
+//Eigen::Quaternion <double> createFromAxisAngle(const double xx, const double yy, const double zz, const double a);
+
+
 int
 main (int argc,
       char **argv)
@@ -69,6 +77,8 @@ main (int argc,
 //    sleep (5.0);
 //  }
 
+  group.move();
+
   ROS_INFO("Starting new plan .......");
 
   // REUSE the last state in the plan
@@ -91,10 +101,19 @@ main (int argc,
   //group.setStartStateToCurrentState();
 
   geometry_msgs::Pose target_pose2;
-  target_pose2.orientation.x = 0.0;
-  target_pose2.orientation.y = 1.0;
-  target_pose2.orientation.z = 0.0;
-  target_pose2.orientation.w = 0.0;
+  Eigen::Quaternion<float> qua = Eigen::Quaternion<float>(Eigen::AngleAxis<float>(90 * M_PI / 180, Eigen::Vector3f::UnitX()));
+  std::cout << std::endl << "QUATERNION: " << "x= " << qua.x() << " y= " << qua.y() << " z= " << qua.z() << " w= " << qua.w() << std::endl;
+  target_pose2.orientation.w = qua.w();
+
+  target_pose2.orientation.x = qua.x();
+  target_pose2.orientation.y = qua.y();
+  target_pose2.orientation.z = qua.z();
+
+//  target_pose2.orientation.x = 0.0;
+//  target_pose2.orientation.y = 0.259919;
+//  target_pose2.orientation.z = 0.0;
+//  target_pose2.orientation.w = 0.965925;
+
   target_pose2.position.x = 0.55;
   target_pose2.position.y = -0.4;
   target_pose2.position.z = 0.15;
@@ -360,3 +379,18 @@ main (int argc,
   ros::shutdown ();
   return 0;
 }
+
+//Eigen::Quaternion <double> createFromAxisAngle(const double xx, const double yy, const double zz, const double a)
+//{
+//    double result = sin(a / 2.0);
+//    double x = xx * result;
+//    double y = yy * result;
+//    double z = zz * result;
+//
+//    double w = cos(a / 2.0);
+//
+//    Eigen::Quaternion qua(w, x, y, z);
+//    qua.normalize();
+//
+//    return qua;
+//}
