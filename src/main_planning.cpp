@@ -33,13 +33,60 @@ main (int argc,
   moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
   ros::Publisher display_publisher = node_handle.advertise<moveit_msgs::DisplayTrajectory> ("/move_group/display_planned_path", 1, true);
   moveit_msgs::DisplayTrajectory display_trajectory;
+  moveit::planning_interface::MoveGroup::Plan my_plan;
 
   // Getting Basic Information
-  ROS_INFO("Planing frame: %s", group.getPlanningFrame ().c_str ());
-  ROS_INFO("EndEffectorLink frame: %s", group.getEndEffectorLink ().c_str ());
+  std::string planning_frame = group.getPlanningFrame ();
+  std::string end_effector_link = group.getEndEffectorLink();
+
+  ROS_INFO("Planing frame: %s", planning_frame.c_str());
+  ROS_INFO("EndEffectorLink frame: %s", end_effector_link.c_str());
 
   // saved 1st state
   robot_state::RobotState first_state = *group.getCurrentState ();
+
+  // get end effector
+  geometry_msgs::PoseStamped end_effector = group.getCurrentPose(end_effector_link);
+  std::cout << "END EFFECTOR Position:"
+      << " x= " << end_effector.pose.position.x
+      << " y= " << end_effector.pose.position.y
+      << " z= " << end_effector.pose.position.z
+      << std::endl;
+
+  std::cout << "END EFFECTOR Orientation:"
+      << " x= " << end_effector.pose.orientation.x
+      << " y= " << end_effector.pose.orientation.y
+      << " z= " << end_effector.pose.orientation.z
+      << " w= " << end_effector.pose.orientation.w
+      << std::endl;
+
+  geometry_msgs::Pose target_pose0;
+  target_pose0.position = end_effector.pose.position;
+
+  //rotate 30 around
+  Eigen::Quaternion<float> qua0 = Eigen::Quaternion<float> (Eigen::AngleAxis<float> (60 * DEG2RAD, Eigen::Vector3f::UnitX()));
+  Eigen::Quaternion<float> temp;
+  temp.w() = end_effector.pose.orientation.w;
+  temp.x() = end_effector.pose.orientation.x;
+  temp.y() = end_effector.pose.orientation.y;
+  temp.z() = end_effector.pose.orientation.z;
+
+
+  Eigen::Quaternion<float> qua_final = temp * qua0;
+  target_pose0.orientation.w = qua_final.w();
+  target_pose0.orientation.x = qua_final.x();
+  target_pose0.orientation.y = qua_final.y();
+  target_pose0.orientation.z = qua_final.z();
+
+  group.setPoseTarget(target_pose0);
+
+  // call the planner
+  bool success = group.plan (my_plan);
+
+  ROS_INFO("Visualizing plan: Effector %s", success ? "" : "FAILED");
+  sleep (15.0);
+
+// ===========================================================================
 
   // plan a motion to a desired pose for the end-effector.
   geometry_msgs::Pose target_pose1;
@@ -68,8 +115,7 @@ main (int argc,
   group.setPoseTarget (target_pose1);
 
   // call the planner
-  moveit::planning_interface::MoveGroup::Plan my_plan;
-  bool success = group.plan (my_plan);
+  success = group.plan (my_plan);
 
   ROS_INFO("Visualizing plan: x %s", success ? "" : "FAILED");
   sleep (5.0);
@@ -85,6 +131,7 @@ main (int argc,
 //    sleep (5.0);
 //  }
 
+  //
   group.move ();
 
   ROS_INFO("Starting new plan .......");
@@ -137,9 +184,15 @@ main (int argc,
   ROS_INFO("Visualizing plan: orientation %s", success ? "" : "FAILED");
   sleep (5.0);
 
+
+
+
+
   // Moving to a pose goal
   /* Uncomment below line when working with a real robot*/
   /* group.move() */
+
+
 
 //==================================================================
 //// test poses
