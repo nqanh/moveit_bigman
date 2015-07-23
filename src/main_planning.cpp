@@ -16,7 +16,6 @@
 
 //Eigen::Quaternion <double> createFromAxisAngle(const double xx, const double yy, const double zz, const double a);
 
-
 int
 main (int argc,
       char **argv)
@@ -49,14 +48,23 @@ main (int argc,
 //  target_pose1.orientation.z = 0.7071;
 //  target_pose1.orientation.w = 0.0;
 
-  target_pose1.orientation.x = 1.0;
-  target_pose1.orientation.y = 0.0;
-  target_pose1.orientation.z = 0.0;
-  target_pose1.orientation.w = 0.0;
+//  target_pose1.orientation.x = 1.0;
+//  target_pose1.orientation.y = 0.0;
+//  target_pose1.orientation.z = 0.0;
+//  target_pose1.orientation.w = 0.0;
 
-  target_pose1.position.x = 0.55;
+  Eigen::Quaternion<float> qua1 = Eigen::Quaternion<float> (Eigen::AngleAxis<float> (-90 * DEG2RAD, Eigen::Vector3f::UnitY()));
+  std::cout << std::endl << "QUATERNION 1: " << "x= " << qua1.x () << " y= " << qua1.y () << " z= " << qua1.z () << " w= " << qua1.w () << std::endl << std::endl;
+  target_pose1.orientation.w = qua1.w ();
+
+  target_pose1.orientation.x = qua1.x ();
+  target_pose1.orientation.y = qua1.y ();
+  target_pose1.orientation.z = qua1.z ();
+
+  target_pose1.position.x = 0.5;
   target_pose1.position.y = -0.4;
   target_pose1.position.z = 0.15;
+
   group.setPoseTarget (target_pose1);
 
   // call the planner
@@ -77,7 +85,7 @@ main (int argc,
 //    sleep (5.0);
 //  }
 
-  group.move();
+  group.move ();
 
   ROS_INFO("Starting new plan .......");
 
@@ -101,13 +109,18 @@ main (int argc,
   //group.setStartStateToCurrentState();
 
   geometry_msgs::Pose target_pose2;
-  Eigen::Quaternion<float> qua = Eigen::Quaternion<float>(Eigen::AngleAxis<float>(90 * M_PI / 180, Eigen::Vector3f::UnitX()));
-  std::cout << std::endl << "QUATERNION: " << "x= " << qua.x() << " y= " << qua.y() << " z= " << qua.z() << " w= " << qua.w() << std::endl;
-  target_pose2.orientation.w = qua.w();
+  Eigen::Quaternion<float> qua2 = Eigen::Quaternion<float> (Eigen::AngleAxis<float> (45 * DEG2RAD, Eigen::Vector3f::UnitX ()));
+  std::cout << std::endl << "QUATERNION 2: " << "x= " << qua2.x () << " y= " << qua2.y () << " z= " << qua2.z () << " w= " << qua2.w () << std::endl << std::endl;
 
-  target_pose2.orientation.x = qua.x();
-  target_pose2.orientation.y = qua.y();
-  target_pose2.orientation.z = qua.z();
+  Eigen::Quaternion<float> qua3 = qua1 * qua2;
+  std::cout << std::endl << "QUATERNION 3: " << "x= " << qua3.x () << " y= " << qua3.y () << " z= " << qua3.z () << " w= " << qua3.w () << std::endl << std::endl;
+
+
+  target_pose2.orientation.w = qua3.w ();
+
+  target_pose2.orientation.x = qua3.x ();
+  target_pose2.orientation.y = qua3.y ();
+  target_pose2.orientation.z = qua3.z ();
 
 //  target_pose2.orientation.x = 0.0;
 //  target_pose2.orientation.y = 0.259919;
