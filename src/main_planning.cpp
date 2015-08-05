@@ -1,4 +1,4 @@
-#include<iostream>
+#include <iostream>
 
 #include <moveit/move_group_interface/move_group.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
@@ -180,8 +180,22 @@ main (int argc,
   group.setPoseTarget (target_pose2);
 
   //call the planner
-  success = group.plan (my_plan);
-  ROS_INFO("Visualizing plan: orientation %s", success ? "" : "FAILED");
+
+//  success = group.plan (my_plan);
+//  ROS_INFO("Visualizing plan: orientation %s", success ? "" : "FAILED");
+
+    // Visualizing // may need publisher ...
+    while(1)
+    {
+      success = group.plan(my_plan);
+      //ROS_INFO("Visualizing plan (again) ... ");
+      ROS_INFO("Visualizing new plan: orientation %s", success ? "" : "FAILED");
+      display_trajectory.trajectory_start = my_plan.start_state_;
+      display_trajectory.trajectory.push_back (my_plan.trajectory_);
+      display_publisher.publish (display_trajectory);
+      //sleep (5.0);
+    }
+
   sleep (5.0);
 
 
