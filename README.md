@@ -1,2 +1,2 @@
 # moveit_walkman
-planning for walkman
+update planning for walkman
