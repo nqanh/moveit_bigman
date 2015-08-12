@@ -52,7 +52,6 @@ drawText4 (cv::Mat image,
            std::string text,
            cv::Scalar color);
 
-
 // Draw match descriptor
 void
 drawText5 (cv::Mat image,

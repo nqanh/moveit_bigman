@@ -38,10 +38,10 @@ main (int argc,
   // wait for RIVZ
   sleep (15.0);
 
-  // listen to pre_grasp_data
-  ros::Subscriber sub = node_handle.subscribe("pre_grasp_data", 1000, chatterCallback);
-  std::cout << "I'm in ros spin ...." << std::endl;
-  ros::spinOnce();
+//  // listen to pre_grasp_data
+//  ros::Subscriber sub = node_handle.subscribe("pre_grasp_data", 1000, chatterCallback);
+//  std::cout << "I'm in ros spin ...." << std::endl;
+//  ros::spinOnce();
 
   // Setup
   moveit::planning_interface::MoveGroup group ("right_arm");

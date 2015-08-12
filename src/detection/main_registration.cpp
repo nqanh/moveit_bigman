@@ -112,7 +112,7 @@ main ()
   help ();
 
   string object_class = "drill";
-  string object_name = "07_xxx"; //change to "07_000" if want to train file 000.jpg
+  string object_name = "07_xxx";  //change to "07_000" if want to train file 000.jpg
 
   string depth_path = tutorial_path + object_class + "/train" + "/depth/" + object_name + ".jpg";
   string rgb_path = tutorial_path + object_class + "/train" + "/rgb/" + object_name + ".jpg";

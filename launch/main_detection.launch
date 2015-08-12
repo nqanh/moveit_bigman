@@ -1,0 +1,8 @@
+<launch>
+
+  <include file="$(find bigman_moveit_config)/launch/demo.launch"/>
+
+  <node name="main_detection" pkg="moveit_bigman" type="main_detection" respawn="false" output="screen">
+  </node>
+
+</launch>

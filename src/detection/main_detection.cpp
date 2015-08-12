@@ -1,14 +1,13 @@
 #include <iostream>
 #include <time.h>
 
+#include <opencv2/core.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/core/utility.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/video/tracking.hpp>
-
-#include <opencv2/core.hpp>
 
 #include <Eigen/Geometry>
 #include <Eigen/Dense>
@@ -39,12 +38,6 @@ using namespace Eigen;
 #define DEG2RAD (M_PI/180.0)
 
 string tutorial_path = "/home/walkman/anh_nguyen/workspace/pre_grasp_data/";  // path to data
-
-string video_read_path = tutorial_path + "drill03/drill03.avi";  // recorded video
-string video_depth_path = tutorial_path + "drill03/drill03_depth.avi";
-string image_depth_path = tutorial_path + "drill03/depth_0.jpg";
-string yml_read_path = tutorial_path + "drill03/drill03_ORB.yml";  // 3dpts + descriptors
-string ply_read_path = tutorial_path + "drill03/drill03_box.ply";  // mesh
 
 // Intrinsic camera parameters: Asus Xtion Pro for rgb
 double params_WEBCAM[] = { 570.3422241210938,   // fx
@@ -131,7 +124,30 @@ main (int argc,
 
   help ();
 
+#if(1) // init MoveIt!
 
+  ros::init (argc, argv, "main_detection");
+  ros::NodeHandle node_handle;
+  ros::AsyncSpinner spinner (1);
+  spinner.start ();
+
+  // wait for RIVZ
+  sleep (15.0);
+
+  moveit::planning_interface::MoveGroup group ("right_arm");
+  moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+  ros::Publisher display_publisher = node_handle.advertise<moveit_msgs::DisplayTrajectory> ("/move_group/display_planned_path", 1, true);
+  moveit_msgs::DisplayTrajectory display_trajectory;
+  moveit::planning_interface::MoveGroup::Plan my_plan;
+
+  // Getting Basic Information
+  std::string planning_frame = group.getPlanningFrame ();
+  std::string end_effector_link = group.getEndEffectorLink ();
+
+  ROS_INFO("Planing frame: %s", planning_frame.c_str ());
+  ROS_INFO("EndEffectorLink frame: %s", end_effector_link.c_str ());
+
+#endif
 
 #if(1) // help string
   const String keys = "{help h        |      | print this message                   }"
@@ -158,9 +174,9 @@ main (int argc,
   }
   else
   {
-    video_read_path = parser.get<string> ("video").size () > 0 ? parser.get<string> ("video") : video_read_path;
-    yml_read_path = parser.get<string> ("model").size () > 0 ? parser.get<string> ("model") : yml_read_path;
-    ply_read_path = parser.get<string> ("mesh").size () > 0 ? parser.get<string> ("mesh") : ply_read_path;
+//    video_read_path = parser.get<string> ("video").size () > 0 ? parser.get<string> ("video") : video_read_path;
+//    yml_read_path = parser.get<string> ("model").size () > 0 ? parser.get<string> ("model") : yml_read_path;
+//    ply_read_path = parser.get<string> ("mesh").size () > 0 ? parser.get<string> ("mesh") : ply_read_path;
     numKeyPoints = !parser.has ("keypoints") ? parser.get<int> ("keypoints") : numKeyPoints;
     ratioTest = !parser.has ("ratio") ? parser.get<float> ("ratio") : ratioTest;
     fast_match = !parser.has ("fast") ? parser.get<bool> ("fast") : fast_match;
@@ -215,6 +231,10 @@ main (int argc,
 #endif
 
 #if(1) // variables for main()
+
+  // planning
+  bool success;
+
   // image and depth path - only use in TEST_FROM_IMAGE_FOLDER
   string test_rgb_path;
   string test_depth_path;
@@ -250,16 +270,19 @@ main (int argc,
     cout << "Error: Root rotation matrix is empty" << endl;
     return -1;
   }
-  cout << "Root rotation matrix: " << endl;
-  cout << rotation_matrix_root << endl;
+//  cout << "Root rotation matrix: " << endl;
+//  cout << rotation_matrix_root << endl;
 
 #endif
-
 
   // main loop - via all image or frame
   //while (cap.read (frame) && cap_depth.read (frame_depth) && waitKey (30) != 27)  // capture frame until ESC is pressed
   //while (cap.read (frame) && waitKey (30) != 27)  // capture frame until ESC is pressed
   //while (waitKey (30) != 27)
+
+  cout << ".......... START VISION SYSTEM .........." << endl;
+  sleep(1);
+
   while (1)
   {
     cout << mainLoop;
@@ -637,6 +660,10 @@ main (int argc,
         // draw frameID
         drawText3 (frame_rgb_vis, "Frame: " + testID, yellow);
         drawText4 (frame_rgb_vis, "Descriptor: " + objectID, red);
+
+        // show image
+        imshow ("2D", frame_rgb_vis);
+        imshow ("Depth", frame_depth_vis);
 #endif
 
 #if(1) // publish message
@@ -653,9 +680,56 @@ main (int argc,
 //          cout << "Publish done! Message: " << msg.data << endl;
 //        }
 
-
 #endif
 
+#if(1) // planning
+
+        // plan a motion to a desired pose for the end-effector.
+          geometry_msgs::Pose target_pose1;
+        //  target_pose1.orientation.x = 0.7071;
+        //  target_pose1.orientation.y = 0.0;
+        //  target_pose1.orientation.z = 0.7071;
+        //  target_pose1.orientation.w = 0.0;
+
+        //  target_pose1.orientation.x = 1.0;
+        //  target_pose1.orientation.y = 0.0;
+        //  target_pose1.orientation.z = 0.0;
+        //  target_pose1.orientation.w = 0.0;
+
+          Eigen::Quaternion<float> qua1 = Eigen::Quaternion<float> (Eigen::AngleAxis<float> (-90 * DEG2RAD, Eigen::Vector3f::UnitY ()));
+          std::cout << std::endl << "QUATERNION 1: " << "x= " << qua1.x () << " y= " << qua1.y () << " z= " << qua1.z () << " w= " << qua1.w () << std::endl
+              << std::endl;
+          target_pose1.orientation.w = qua1.w ();
+
+          target_pose1.orientation.x = qua1.x ();
+          target_pose1.orientation.y = qua1.y ();
+          target_pose1.orientation.z = qua1.z ();
+
+          target_pose1.position.x = 0.5;
+          target_pose1.position.y = -0.4;
+          target_pose1.position.z = 0.15;
+
+          group.setPoseTarget (target_pose1);
+
+          // call the planner
+        //  while (1)
+        //  {
+        //    success = group.plan (my_plan);
+        //    ROS_INFO("Visualizing plan: 1st plan %s", success ? "" : "FAILED");
+        //  }
+
+          success = group.plan (my_plan);
+          //ROS_INFO("Visualizing plan: 1st plan %s", success ? "" : "FAILED");
+
+          if (success)
+            cout << "Visualizing plan for " << testID << " - Result: SUCCESS " << endl;
+          else
+            cout << "Visualizing plan for " << testID << " - Result: FAILED " << endl;
+
+          cout << ".... Sleep for 5 seconds now ...." << endl;
+          sleep(5);
+
+#endif
 
         cout << "Found in " << iDes << " loop." << endl;
         cout << descLoop;
@@ -699,8 +773,7 @@ main (int argc,
 
     }
 
-    imshow ("2D", frame_rgb_vis);
-    imshow ("Depth", frame_depth_vis);
+
 
     cout << mainLoop;
     char waitKey;
