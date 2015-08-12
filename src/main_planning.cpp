@@ -9,6 +9,9 @@
 #include <moveit_msgs/AttachedCollisionObject.h>
 #include <moveit_msgs/CollisionObject.h>
 
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+
 #include <Eigen/Geometry>
 
 #define RAD2DEG (180.0/M_PI)
@@ -16,10 +19,17 @@
 
 //Eigen::Quaternion <double> createFromAxisAngle(const double xx, const double yy, const double zz, const double a);
 
+void chatterCallback(const std_msgs::String::ConstPtr& msg)
+{
+  ROS_INFO("I heard: [%s]", msg->data.c_str());
+}
+
 int
 main (int argc,
       char **argv)
 {
+
+  bool success;
   ros::init (argc, argv, "main_planning");
   ros::NodeHandle node_handle;
   ros::AsyncSpinner spinner (1);
@@ -27,6 +37,11 @@ main (int argc,
 
   // wait for RIVZ
   sleep (15.0);
+
+  // listen to pre_grasp_data
+  ros::Subscriber sub = node_handle.subscribe("pre_grasp_data", 1000, chatterCallback);
+  std::cout << "I'm in ros spin ...." << std::endl;
+  ros::spinOnce();
 
   // Setup
   moveit::planning_interface::MoveGroup group ("right_arm");
@@ -37,58 +52,53 @@ main (int argc,
 
   // Getting Basic Information
   std::string planning_frame = group.getPlanningFrame ();
-  std::string end_effector_link = group.getEndEffectorLink();
+  std::string end_effector_link = group.getEndEffectorLink ();
 
-  ROS_INFO("Planing frame: %s", planning_frame.c_str());
-  ROS_INFO("EndEffectorLink frame: %s", end_effector_link.c_str());
+  ROS_INFO("Planing frame: %s", planning_frame.c_str ());
+  ROS_INFO("EndEffectorLink frame: %s", end_effector_link.c_str ());
 
   // saved 1st state
   robot_state::RobotState first_state = *group.getCurrentState ();
 
   // get end effector
-  geometry_msgs::PoseStamped end_effector = group.getCurrentPose(end_effector_link);
-  std::cout << "END EFFECTOR Position:"
-      << " x= " << end_effector.pose.position.x
-      << " y= " << end_effector.pose.position.y
-      << " z= " << end_effector.pose.position.z
-      << std::endl;
+  geometry_msgs::PoseStamped end_effector = group.getCurrentPose (end_effector_link);
+  std::cout << "END EFFECTOR Position:" << " x= " << end_effector.pose.position.x << " y= " << end_effector.pose.position.y << " z= "
+      << end_effector.pose.position.z << std::endl;
 
-  std::cout << "END EFFECTOR Orientation:"
-      << " x= " << end_effector.pose.orientation.x
-      << " y= " << end_effector.pose.orientation.y
-      << " z= " << end_effector.pose.orientation.z
-      << " w= " << end_effector.pose.orientation.w
-      << std::endl;
+  std::cout << "END EFFECTOR Orientation:" << " x= " << end_effector.pose.orientation.x << " y= " << end_effector.pose.orientation.y << " z= "
+      << end_effector.pose.orientation.z << " w= " << end_effector.pose.orientation.w << std::endl;
 
   geometry_msgs::Pose target_pose0;
   target_pose0.position = end_effector.pose.position;
 
-  //rotate 30 around
-  Eigen::Quaternion<float> qua0 = Eigen::Quaternion<float> (Eigen::AngleAxis<float> (60 * DEG2RAD, Eigen::Vector3f::UnitX()));
-  Eigen::Quaternion<float> temp;
-  temp.w() = end_effector.pose.orientation.w;
-  temp.x() = end_effector.pose.orientation.x;
-  temp.y() = end_effector.pose.orientation.y;
-  temp.z() = end_effector.pose.orientation.z;
+//  //// ===========================================================================
+//  //
+//  //rotate 30 around
+//  Eigen::Quaternion<float> qua0 = Eigen::Quaternion<float> (Eigen::AngleAxis<float> (60 * DEG2RAD, Eigen::Vector3f::UnitX()));
+//  Eigen::Quaternion<float> temp;
+//  temp.w() = end_effector.pose.orientation.w;
+//  temp.x() = end_effector.pose.orientation.x;
+//  temp.y() = end_effector.pose.orientation.y;
+//  temp.z() = end_effector.pose.orientation.z;
+//
+//
+//  Eigen::Quaternion<float> qua_final = temp * qua0;
+//  target_pose0.orientation.w = qua_final.w();
+//  target_pose0.orientation.x = qua_final.x();
+//  target_pose0.orientation.y = qua_final.y();
+//  target_pose0.orientation.z = qua_final.z();
+//
+//  group.setPoseTarget(target_pose0);
+//
+//  // call the planner
+//  success = group.plan (my_plan);
+//
+//  ROS_INFO("Visualizing plan: Effector %s", success ? "" : "FAILED");
+//  sleep (500.0);
 
+//// ===========================================================================
 
-  Eigen::Quaternion<float> qua_final = temp * qua0;
-  target_pose0.orientation.w = qua_final.w();
-  target_pose0.orientation.x = qua_final.x();
-  target_pose0.orientation.y = qua_final.y();
-  target_pose0.orientation.z = qua_final.z();
-
-  group.setPoseTarget(target_pose0);
-
-  // call the planner
-  bool success = group.plan (my_plan);
-
-  ROS_INFO("Visualizing plan: Effector %s", success ? "" : "FAILED");
-  sleep (15.0);
-
-// ===========================================================================
-
-  // plan a motion to a desired pose for the end-effector.
+// plan a motion to a desired pose for the end-effector.
   geometry_msgs::Pose target_pose1;
 //  target_pose1.orientation.x = 0.7071;
 //  target_pose1.orientation.y = 0.0;
@@ -100,8 +110,9 @@ main (int argc,
 //  target_pose1.orientation.z = 0.0;
 //  target_pose1.orientation.w = 0.0;
 
-  Eigen::Quaternion<float> qua1 = Eigen::Quaternion<float> (Eigen::AngleAxis<float> (-90 * DEG2RAD, Eigen::Vector3f::UnitY()));
-  std::cout << std::endl << "QUATERNION 1: " << "x= " << qua1.x () << " y= " << qua1.y () << " z= " << qua1.z () << " w= " << qua1.w () << std::endl << std::endl;
+  Eigen::Quaternion<float> qua1 = Eigen::Quaternion<float> (Eigen::AngleAxis<float> (-90 * DEG2RAD, Eigen::Vector3f::UnitY ()));
+  std::cout << std::endl << "QUATERNION 1: " << "x= " << qua1.x () << " y= " << qua1.y () << " z= " << qua1.z () << " w= " << qua1.w () << std::endl
+      << std::endl;
   target_pose1.orientation.w = qua1.w ();
 
   target_pose1.orientation.x = qua1.x ();
@@ -115,98 +126,113 @@ main (int argc,
   group.setPoseTarget (target_pose1);
 
   // call the planner
-  success = group.plan (my_plan);
-
-  ROS_INFO("Visualizing plan: x %s", success ? "" : "FAILED");
-  sleep (5.0);
-
-//  // Visualizing // may need publisher ...
-//  if (1)
-//  //while(1)
+//  while (1)
 //  {
-//    ROS_INFO("Visualizing plan (again) ... ");
+//    success = group.plan (my_plan);
+//    ROS_INFO("Visualizing plan: 1st plan %s", success ? "" : "FAILED");
+//  }
+
+  success = group.plan (my_plan);
+  ROS_INFO("Visualizing plan: 1st plan %s", success ? "" : "FAILED");
+
+//  while (1)
+//  {
+//    ROS_INFO("Broadcasting plan ... ");
 //    display_trajectory.trajectory_start = my_plan.start_state_;
 //    display_trajectory.trajectory.push_back (my_plan.trajectory_);
 //    display_publisher.publish (display_trajectory);
-//    sleep (5.0);
+//    //sleep (5.0);
 //  }
 
-  //
-  group.move ();
+  sleep (50.0);
 
-  ROS_INFO("Starting new plan .......");
+//// ===========================================================================
+//
+////  // Visualizing // may need publisher ...
+////  if (1)
+////  //while(1)
+////  {
+////    ROS_INFO("Visualizing plan (again) ... ");
+////    display_trajectory.trajectory_start = my_plan.start_state_;
+////    display_trajectory.trajectory.push_back (my_plan.trajectory_);
+////    display_publisher.publish (display_trajectory);
+////    sleep (5.0);
+////  }
+//
+//  //
+//  group.move ();
+//
+//  ROS_INFO("Starting new plan .......");
+//
+//  // REUSE the last state in the plan
+//  // CHECK again WHAT HAPPEN IF THE ROBOT MOVES ITS ARM --> what is the current state???
+//
+//  robot_state::RobotState start_state (*group.getCurrentState ());
+//  //geometry_msgs::Pose start_pose2 = target_pose1;
+//  geometry_msgs::Pose start_pose2 = target_pose1;
+////  start_pose2.orientation.w = 0.0;
+////  start_pose2.orientation.x = 1.0;
+////  start_pose2.orientation.y = 0.0;
+////  start_pose2.orientation.z = 0.0;
+////  start_pose2.position.x = 0.55;
+////  start_pose2.position.y = -0.4;
+////  start_pose2.position.z = 0.15;
+//  const robot_state::JointModelGroup *joint_model_group = start_state.getJointModelGroup (group.getName ());
+//  start_state.setFromIK (joint_model_group, start_pose2);
+//  group.setStartState (start_state);
+//
+//  //group.setStartStateToCurrentState();
+//
+//  geometry_msgs::Pose target_pose2;
+//  Eigen::Quaternion<float> qua2 = Eigen::Quaternion<float> (Eigen::AngleAxis<float> (45 * DEG2RAD, Eigen::Vector3f::UnitX ()));
+//  std::cout << std::endl << "QUATERNION 2: " << "x= " << qua2.x () << " y= " << qua2.y () << " z= " << qua2.z () << " w= " << qua2.w () << std::endl << std::endl;
+//
+//  Eigen::Quaternion<float> qua3 = qua1 * qua2;
+//  std::cout << std::endl << "QUATERNION 3: " << "x= " << qua3.x () << " y= " << qua3.y () << " z= " << qua3.z () << " w= " << qua3.w () << std::endl << std::endl;
+//
+//
+//  target_pose2.orientation.w = qua3.w ();
+//
+//  target_pose2.orientation.x = qua3.x ();
+//  target_pose2.orientation.y = qua3.y ();
+//  target_pose2.orientation.z = qua3.z ();
+//
+////  target_pose2.orientation.x = 0.0;
+////  target_pose2.orientation.y = 0.259919;
+////  target_pose2.orientation.z = 0.0;
+////  target_pose2.orientation.w = 0.965925;
+//
+//  target_pose2.position.x = 0.55;
+//  target_pose2.position.y = -0.4;
+//  target_pose2.position.z = 0.15;
+//  group.setPoseTarget (target_pose2);
+//
+//  //call the planner
+//
+////  success = group.plan (my_plan);
+////  ROS_INFO("Visualizing plan: orientation %s", success ? "" : "FAILED");
+//
+//    // Visualizing // may need publisher ...
+//    while(1)
+//    {
+//      success = group.plan(my_plan);
+//      //ROS_INFO("Visualizing plan (again) ... ");
+//      ROS_INFO("Visualizing new plan: orientation %s", success ? "" : "FAILED");
+//      display_trajectory.trajectory_start = my_plan.start_state_;
+//      display_trajectory.trajectory.push_back (my_plan.trajectory_);
+//      display_publisher.publish (display_trajectory);
+//      //sleep (5.0);
+//    }
+//
+//  sleep (5.0);
+//
+//
+//
+// // ===========================================================================
 
-  // REUSE the last state in the plan
-  // CHECK again WHAT HAPPEN IF THE ROBOT MOVES ITS ARM --> what is the current state???
-
-  robot_state::RobotState start_state (*group.getCurrentState ());
-  //geometry_msgs::Pose start_pose2 = target_pose1;
-  geometry_msgs::Pose start_pose2 = target_pose1;
-//  start_pose2.orientation.w = 0.0;
-//  start_pose2.orientation.x = 1.0;
-//  start_pose2.orientation.y = 0.0;
-//  start_pose2.orientation.z = 0.0;
-//  start_pose2.position.x = 0.55;
-//  start_pose2.position.y = -0.4;
-//  start_pose2.position.z = 0.15;
-  const robot_state::JointModelGroup *joint_model_group = start_state.getJointModelGroup (group.getName ());
-  start_state.setFromIK (joint_model_group, start_pose2);
-  group.setStartState (start_state);
-
-  //group.setStartStateToCurrentState();
-
-  geometry_msgs::Pose target_pose2;
-  Eigen::Quaternion<float> qua2 = Eigen::Quaternion<float> (Eigen::AngleAxis<float> (45 * DEG2RAD, Eigen::Vector3f::UnitX ()));
-  std::cout << std::endl << "QUATERNION 2: " << "x= " << qua2.x () << " y= " << qua2.y () << " z= " << qua2.z () << " w= " << qua2.w () << std::endl << std::endl;
-
-  Eigen::Quaternion<float> qua3 = qua1 * qua2;
-  std::cout << std::endl << "QUATERNION 3: " << "x= " << qua3.x () << " y= " << qua3.y () << " z= " << qua3.z () << " w= " << qua3.w () << std::endl << std::endl;
-
-
-  target_pose2.orientation.w = qua3.w ();
-
-  target_pose2.orientation.x = qua3.x ();
-  target_pose2.orientation.y = qua3.y ();
-  target_pose2.orientation.z = qua3.z ();
-
-//  target_pose2.orientation.x = 0.0;
-//  target_pose2.orientation.y = 0.259919;
-//  target_pose2.orientation.z = 0.0;
-//  target_pose2.orientation.w = 0.965925;
-
-  target_pose2.position.x = 0.55;
-  target_pose2.position.y = -0.4;
-  target_pose2.position.z = 0.15;
-  group.setPoseTarget (target_pose2);
-
-  //call the planner
-
-//  success = group.plan (my_plan);
-//  ROS_INFO("Visualizing plan: orientation %s", success ? "" : "FAILED");
-
-    // Visualizing // may need publisher ...
-    while(1)
-    {
-      success = group.plan(my_plan);
-      //ROS_INFO("Visualizing plan (again) ... ");
-      ROS_INFO("Visualizing new plan: orientation %s", success ? "" : "FAILED");
-      display_trajectory.trajectory_start = my_plan.start_state_;
-      display_trajectory.trajectory.push_back (my_plan.trajectory_);
-      display_publisher.publish (display_trajectory);
-      //sleep (5.0);
-    }
-
-  sleep (5.0);
-
-
-
-
-
-  // Moving to a pose goal
+// Moving to a pose goal
   /* Uncomment below line when working with a real robot*/
   /* group.move() */
-
-
 
 //==================================================================
 //// test poses
