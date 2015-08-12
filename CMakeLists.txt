@@ -8,6 +8,34 @@ find_package(catkin REQUIRED COMPONENTS moveit_core moveit_ros_planning moveit_r
 
 find_package(Boost REQUIRED system filesystem date_time thread)
 
+
+
+find_package(PCL 1.7 REQUIRED)
+find_package(OpenCV 3.0.0 REQUIRED)
+find_package(Eigen3 REQUIRED)
+
+## Set compiler optimization flags
+set(CMAKE_CXX_FLAGS "-DNDEBUG  -O0 -Wall -fopenmp -Wno-deprecated -Wenum-compare -D WITH_OPENNI=ON -D WITH_OPENNI2=ON -D WITH_V4L=ON")
+
+
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
+
+include_directories(${OpenCV_INCLUDE_DIRS})
+link_directories(${OpenCV_LIBRARY_DIRS})
+add_definitions(${OpenCV_DEFINITIONS})
+
+include_directories(EIGEN3_INCLUDE_DIR)
+
+
+
+
+
+
+
+
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES pr2_moveit_tutorials
@@ -16,7 +44,8 @@ catkin_package(
     moveit_ros_planning_interface
     interactive_markers
 )
-find_package(Eigen REQUIRED)
+
+#find_package(Eigen REQUIRED)
 
 #################################
 ## Build
@@ -36,4 +65,5 @@ install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 ## for lauch files
 #################################
 
-#add_subdirectory(bigman_moveit_config)  
+add_executable(main_detection src/detection/main_detection.cpp   src/detection/CsvReader.cpp   src/detection/CsvWriter.cpp  src/detection/ModelRegistration.cpp   src/detection/Mesh.cpp   src/detection/Model.cpp   src/detection/PnPProblem.cpp   src/detection/Utils.cpp  src/detection/RobustMatcher.cpp src/detection/RootFrame.cpp)
+target_link_libraries(main_detection   ${OpenCV_LIBS} ${Boost_LIBRARIES})
