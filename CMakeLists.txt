@@ -65,6 +65,10 @@ install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 ## for lauch files
 #################################
 
-add_executable(main_detection src/detection/main_detection.cpp   src/detection/CsvReader.cpp   src/detection/CsvWriter.cpp  src/detection/ModelRegistration.cpp   src/detection/Mesh.cpp   src/detection/Model.cpp   src/detection/PnPProblem.cpp   src/detection/Utils.cpp  src/detection/RobustMatcher.cpp src/detection/RootFrame.cpp)
-target_link_libraries(main_detection   ${OpenCV_LIBS} ${Boost_LIBRARIES} ${catkin_LIBRARIES} )
-install(TARGETS main_detection DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+#add_executable(main_detection src/detection/main_detection.cpp   src/detection/CsvReader.cpp   src/detection/CsvWriter.cpp  src/detection/ModelRegistration.cpp   src/detection/Mesh.cpp   src/detection/Model.cpp   src/detection/PnPProblem.cpp   src/detection/Utils.cpp  src/detection/RobustMatcher.cpp src/detection/RootFrame.cpp)
+#target_link_libraries(main_detection   ${OpenCV_LIBS} ${Boost_LIBRARIES} ${catkin_LIBRARIES} )
+#install(TARGETS main_detection DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+add_executable(main src/detection/main.cpp src/detection/Detection.cpp  src/detection/CsvReader.cpp   src/detection/CsvWriter.cpp  src/detection/ModelRegistration.cpp   src/detection/Mesh.cpp   src/detection/Model.cpp   src/detection/PnPProblem.cpp   src/detection/Utils.cpp  src/detection/RobustMatcher.cpp src/detection/RootFrame.cpp)
+target_link_libraries(main ${OpenCV_LIBS} ${Boost_LIBRARIES} ${catkin_LIBRARIES} )
+install(TARGETS main DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

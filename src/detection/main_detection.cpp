@@ -21,6 +21,7 @@
 
 #include "ros/ros.h"
 #include "std_msgs/String.h"
+#include <tf/transform_broadcaster.h>
 
 #include "Mesh.h"
 #include "Model.h"
@@ -131,21 +132,21 @@ main (int argc,
   ros::AsyncSpinner spinner (1);
   spinner.start ();
 
-  // wait for RIVZ
-  sleep (15.0);
-
-  moveit::planning_interface::MoveGroup group ("right_arm");
-  moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-  ros::Publisher display_publisher = node_handle.advertise<moveit_msgs::DisplayTrajectory> ("/move_group/display_planned_path", 1, true);
-  moveit_msgs::DisplayTrajectory display_trajectory;
-  moveit::planning_interface::MoveGroup::Plan my_plan;
-
-  // Getting Basic Information
-  std::string planning_frame = group.getPlanningFrame ();
-  std::string end_effector_link = group.getEndEffectorLink ();
-
-  ROS_INFO("Planing frame: %s", planning_frame.c_str ());
-  ROS_INFO("EndEffectorLink frame: %s", end_effector_link.c_str ());
+//  // wait for RIVZ
+//  sleep (15.0);
+//
+//  moveit::planning_interface::MoveGroup group ("right_arm");
+//  moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+//  ros::Publisher display_publisher = node_handle.advertise<moveit_msgs::DisplayTrajectory> ("/move_group/display_planned_path", 1, true);
+//  moveit_msgs::DisplayTrajectory display_trajectory;
+//  moveit::planning_interface::MoveGroup::Plan my_plan;
+//
+//  // Getting Basic Information
+//  std::string planning_frame = group.getPlanningFrame ();
+//  std::string end_effector_link = group.getEndEffectorLink ();
+//
+//  ROS_INFO("Planing frame: %s", planning_frame.c_str ());
+//  ROS_INFO("EndEffectorLink frame: %s", end_effector_link.c_str ());
 
 #endif
 
@@ -683,54 +684,57 @@ main (int argc,
 #endif
 
 #if(1) // planning
-
-        // plan a motion to a desired pose for the end-effector.
-          geometry_msgs::Pose target_pose1;
-        //  target_pose1.orientation.x = 0.7071;
-        //  target_pose1.orientation.y = 0.0;
-        //  target_pose1.orientation.z = 0.7071;
-        //  target_pose1.orientation.w = 0.0;
-
-        //  target_pose1.orientation.x = 1.0;
-        //  target_pose1.orientation.y = 0.0;
-        //  target_pose1.orientation.z = 0.0;
-        //  target_pose1.orientation.w = 0.0;
-
-          Eigen::Quaternion<float> qua1 = Eigen::Quaternion<float> (Eigen::AngleAxis<float> (-90 * DEG2RAD, Eigen::Vector3f::UnitY ()));
-          std::cout << std::endl << "QUATERNION 1: " << "x= " << qua1.x () << " y= " << qua1.y () << " z= " << qua1.z () << " w= " << qua1.w () << std::endl
-              << std::endl;
-          target_pose1.orientation.w = qua1.w ();
-
-          target_pose1.orientation.x = qua1.x ();
-          target_pose1.orientation.y = qua1.y ();
-          target_pose1.orientation.z = qua1.z ();
-
-          target_pose1.position.x = 0.5;
-          target_pose1.position.y = -0.4;
-          target_pose1.position.z = 0.15;
-
-          group.setPoseTarget (target_pose1);
-
-          // call the planner
-        //  while (1)
-        //  {
-        //    success = group.plan (my_plan);
-        //    ROS_INFO("Visualizing plan: 1st plan %s", success ? "" : "FAILED");
-        //  }
-
-          success = group.plan (my_plan);
-          //ROS_INFO("Visualizing plan: 1st plan %s", success ? "" : "FAILED");
-
-          if (success)
-            cout << "Visualizing plan for " << testID << " - Result: SUCCESS " << endl;
-          else
-            cout << "Visualizing plan for " << testID << " - Result: FAILED " << endl;
-
-          cout << ".... Sleep for 5 seconds now ...." << endl;
-          sleep(5);
+//
+//        // plan a motion to a desired pose for the end-effector.
+//          geometry_msgs::Pose target_pose1;
+//        //  target_pose1.orientation.x = 0.7071;
+//        //  target_pose1.orientation.y = 0.0;
+//        //  target_pose1.orientation.z = 0.7071;
+//        //  target_pose1.orientation.w = 0.0;
+//
+//        //  target_pose1.orientation.x = 1.0;
+//        //  target_pose1.orientation.y = 0.0;
+//        //  target_pose1.orientation.z = 0.0;
+//        //  target_pose1.orientation.w = 0.0;
+//
+//          Eigen::Quaternion<float> qua1 = Eigen::Quaternion<float> (Eigen::AngleAxis<float> (-90 * DEG2RAD, Eigen::Vector3f::UnitY ()));
+//          std::cout << std::endl << "QUATERNION 1: " << "x= " << qua1.x () << " y= " << qua1.y () << " z= " << qua1.z () << " w= " << qua1.w () << std::endl
+//              << std::endl;
+//          target_pose1.orientation.w = qua1.w ();
+//
+//          target_pose1.orientation.x = qua1.x ();
+//          target_pose1.orientation.y = qua1.y ();
+//          target_pose1.orientation.z = qua1.z ();
+//
+//          target_pose1.position.x = 0.5;
+//          target_pose1.position.y = -0.4;
+//          target_pose1.position.z = 0.15;
+//
+//          group.setPoseTarget (target_pose1);
+//
+//          // call the planner
+//        //  while (1)
+//        //  {
+//        //    success = group.plan (my_plan);
+//        //    ROS_INFO("Visualizing plan: 1st plan %s", success ? "" : "FAILED");
+//        //  }
+//
+//          success = group.plan (my_plan);
+//          //ROS_INFO("Visualizing plan: 1st plan %s", success ? "" : "FAILED");
+//
+//          if (success)
+//            cout << "Visualizing plan for " << testID << " - Result: SUCCESS " << endl;
+//          else
+//            cout << "Visualizing plan for " << testID << " - Result: FAILED " << endl;
+//
+//          cout << ".... Sleep for 5 seconds now ...." << endl;
+//          sleep(5);
 
 #endif
 
+#if (1) //
+
+#endif
         cout << "Found in " << iDes << " loop." << endl;
         cout << descLoop;
         break;
